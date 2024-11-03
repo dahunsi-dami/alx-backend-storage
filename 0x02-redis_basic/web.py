@@ -3,7 +3,6 @@
 
 import redis
 import requests
-import time
 from functools import wraps
 
 redis_client = redis.Redis()
@@ -16,15 +15,17 @@ def cache_page(method):
     """
     @wraps(method)
     def wrapper(url: str) -> str:
-        count_key = f"count:{url}"
+        """Wrapper function for the method."""
+        cache_key = "cached:" + url
+        count_key = "count:" + url
         redis_client.incr(count_key)
 
-        cached_result = redis_client.get(url)
+        cached_result = redis_client.get(cache_key)
         if cached_result:
             return cached_result.decode('utf-8')
 
         result = method(url)
-        redis_client.setex(url, 10, result)
+        redis_client.setex(cache_key, 10, result)
 
         return result
     return wrapper
