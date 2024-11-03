@@ -17,7 +17,7 @@ class Cache:
         It sets up the Redis client, and flushing all existing keys-
         -to make sure the database is empty.
         """
-        self._redis: redis.Redis = redis.Redis()
+        self._redis = redis.Redis()
         self._redis.flushdb()
 
     def store(self, data: Union[str, bytes, int, float]) -> str:
