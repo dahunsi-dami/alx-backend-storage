@@ -121,3 +121,26 @@ class Cache:
             -None if the key does not exist.
         """
         return self.get(key, fn=int)
+
+
+def replay(method: Callable) -> None:
+    """
+    Displays history of calls for the method that's passed.
+
+    Args:
+        method (Callable): the method to replay history for.
+    """
+    cache = method.__self__
+    input_key = method.__qualname__ + ":inputs"
+    output_key = method.__qualname__ + ":outputs"
+
+    inputs = cache._redis.lrange(input_key, 0, -1)
+    outputs = cache._redis.lrange(output_key, 0, -1)
+    count = len(inputs)
+
+    print(f"{method.__qualname__} was called {count} times:")
+    for inp, out in zip(inputs, outputs):
+        print(
+            f"{method.__qualname__}(*{eval(inp.decode('utf-8'))}) -> "
+            f"{out.decode('utf-8')}"
+        )
